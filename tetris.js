@@ -579,9 +579,15 @@ function setupTouchControls() {
     const audio = document.getElementById('clear-audio');
     if (audio) audio.volume = 1.0;
   };
-  if (btnLeft) btnLeft.addEventListener('touchstart', e => { if (!gameActive) return; e.preventDefault(); playAllSounds(); playerMove(-1); });
-  if (btnRight) btnRight.addEventListener('touchstart', e => { if (!gameActive) return; e.preventDefault(); playAllSounds(); playerMove(1); });
-  if (btnDown) btnDown.addEventListener('touchstart', e => { if (!gameActive) return; e.preventDefault(); playAllSounds(); playerDrop(); });
-  if (btnRotate) btnRotate.addEventListener('touchstart', e => { if (!gameActive) return; e.preventDefault(); playAllSounds(); playerRotate(1); });
-  if (btnDrop) btnDrop.addEventListener('touchstart', e => { if (!gameActive) return; e.preventDefault(); playAllSounds(); while (!collide(arena, player)) { player.pos.y++; } player.pos.y--; playerDrop(); });
+  // タッチ・クリック両対応
+  const addBothEvents = (btn, handler) => {
+    if (!btn) return;
+    btn.addEventListener('touchstart', e => { if (!gameActive) return; e.preventDefault(); playAllSounds(); handler(); });
+    btn.addEventListener('click', e => { if (!gameActive) return; e.preventDefault(); playAllSounds(); handler(); });
+  };
+  addBothEvents(btnLeft, () => playerMove(-1));
+  addBothEvents(btnRight, () => playerMove(1));
+  addBothEvents(btnDown, () => playerDrop());
+  addBothEvents(btnRotate, () => playerRotate(1));
+  addBothEvents(btnDrop, () => { while (!collide(arena, player)) { player.pos.y++; } player.pos.y--; playerDrop(); });
 } 
