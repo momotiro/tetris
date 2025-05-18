@@ -438,10 +438,11 @@ function setupTouchControls() {
   const btnDown = document.getElementById('down');
   const btnRotate = document.getElementById('rotate');
   const btnDrop = document.getElementById('drop');
-  if (btnLeft) btnLeft.addEventListener('touchstart', e => { e.preventDefault(); playerMove(-1); });
-  if (btnRight) btnRight.addEventListener('touchstart', e => { e.preventDefault(); playerMove(1); });
-  if (btnDown) btnDown.addEventListener('touchstart', e => { e.preventDefault(); playerDrop(); });
-  if (btnRotate) btnRotate.addEventListener('touchstart', e => { e.preventDefault(); playerRotate(1); });
-  if (btnDrop) btnDrop.addEventListener('touchstart', e => { e.preventDefault(); while (!collide(arena, player)) { player.pos.y++; } player.pos.y--; playerDrop(); });
+  const playAllSounds = () => { playBGM(); };
+  if (btnLeft) btnLeft.addEventListener('touchstart', e => { e.preventDefault(); playAllSounds(); playerMove(-1); });
+  if (btnRight) btnRight.addEventListener('touchstart', e => { e.preventDefault(); playAllSounds(); playerMove(1); });
+  if (btnDown) btnDown.addEventListener('touchstart', e => { e.preventDefault(); playAllSounds(); playerDrop(); });
+  if (btnRotate) btnRotate.addEventListener('touchstart', e => { e.preventDefault(); playAllSounds(); playerRotate(1); });
+  if (btnDrop) btnDrop.addEventListener('touchstart', e => { e.preventDefault(); playAllSounds(); while (!collide(arena, player)) { player.pos.y++; } player.pos.y--; playerDrop(); });
 }
 setupTouchControls(); 

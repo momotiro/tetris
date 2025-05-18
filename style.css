@@ -23,4 +23,37 @@ body::before {
   display: block;
   margin: 0 auto;
   border: 2px solid #fff;
+}
+
+#touch-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+#touch-controls button {
+  flex: 1 1 60px;
+  min-width: 48px;
+  min-height: 48px;
+  font-size: 2em;
+  border-radius: 12px;
+  border: 2px solid #fff;
+  background: #333;
+  color: #fff;
+}
+@media (max-width: 500px) {
+  #touch-controls {
+    max-width: 95vw;
+    gap: 4px;
+  }
+  #touch-controls button {
+    min-width: 36px;
+    min-height: 36px;
+    font-size: 1.3em;
+    border-radius: 8px;
+  }
 } 
