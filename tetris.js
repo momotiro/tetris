@@ -446,7 +446,11 @@ function setupTouchControls() {
   const btnDown = document.getElementById('down');
   const btnRotate = document.getElementById('rotate');
   const btnDrop = document.getElementById('drop');
-  const playAllSounds = () => { playBGM(); playClearSound(); };
+  const playAllSounds = () => {
+    playBGM();
+    const audio = document.getElementById('clear-audio');
+    if (audio) audio.volume = 1.0;
+  };
   if (btnLeft) btnLeft.addEventListener('touchstart', e => { e.preventDefault(); playAllSounds(); playerMove(-1); });
   if (btnRight) btnRight.addEventListener('touchstart', e => { e.preventDefault(); playAllSounds(); playerMove(1); });
   if (btnDown) btnDown.addEventListener('touchstart', e => { e.preventDefault(); playAllSounds(); playerDrop(); });
