@@ -547,8 +547,13 @@ const player = {
   matrix: null,
 };
 
-playerReset();
-update();
+window.addEventListener('DOMContentLoaded', () => {
+  playerReset();
+  update();
+  playBGM();
+  setupTouchControls();
+  startTimer();
+});
 
 // BGM自動再生
 function playBGM() {
@@ -558,7 +563,7 @@ function playBGM() {
     bgm.play().catch(() => {});
   }
 }
-playBGM();
+
 // ユーザー操作時にも再生を試みる（自動再生制限対策）
 document.addEventListener('keydown', playBGM);
 
@@ -579,8 +584,4 @@ function setupTouchControls() {
   if (btnDown) btnDown.addEventListener('touchstart', e => { if (!gameActive) return; e.preventDefault(); playAllSounds(); playerDrop(); });
   if (btnRotate) btnRotate.addEventListener('touchstart', e => { if (!gameActive) return; e.preventDefault(); playAllSounds(); playerRotate(1); });
   if (btnDrop) btnDrop.addEventListener('touchstart', e => { if (!gameActive) return; e.preventDefault(); playAllSounds(); while (!collide(arena, player)) { player.pos.y++; } player.pos.y--; playerDrop(); });
-}
-setupTouchControls();
-
-// ゲーム開始時にタイマー開始
-startTimer(); 
+} 
