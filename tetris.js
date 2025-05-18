@@ -31,9 +31,14 @@ let nextPieceType = null;
 // 効果音再生
 function playClearSound() {
   const audio = document.getElementById('clear-audio');
+  const bgm = document.getElementById('bgm-audio');
+  if (bgm) bgm.volume = 0.03; // BGMを一時的に小さく
   if (audio) {
+    audio.volume = 1.0;
     audio.currentTime = 0;
     audio.play().catch(() => {});
+    // 効果音再生後、BGM音量を元に戻す
+    setTimeout(() => { if (bgm) bgm.volume = 0.25; }, 400);
   }
 }
 
