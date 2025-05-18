@@ -280,9 +280,11 @@ function draw() {
   arena.forEach((row, y) => {
     drawMatrix([row], { x: 0, y: y }, [rowAlphaList[y]]);
   });
-  // ゴースト（落下予測）描画
-  const ghost = getGhostPosition(player, arena);
-  drawMatrixGhost(ghost.matrix, ghost.pos);
+  // ゴースト（落下予測）描画（常に表示）
+  if (player && player.matrix) {
+    const ghost = getGhostPosition(player, arena);
+    drawMatrixGhost(ghost.matrix, ghost.pos);
+  }
   // プレイヤーは常にalpha=1
   drawMatrix(player.matrix, player.pos);
 
@@ -367,7 +369,15 @@ function playerDrop() {
       }, LOCK_DELAY_TIME);
       return;
     } else {
-      // lock delay中はロックしない
+      // lock delay中に↓操作があった場合は即ロック
+      merge(arena, player);
+      playerReset();
+      arenaSweep();
+      lockDelayActive = false;
+      if (lockDelayTimeout) {
+        clearTimeout(lockDelayTimeout);
+        lockDelayTimeout = null;
+      }
       return;
     }
   } else {
