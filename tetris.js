@@ -28,6 +28,15 @@ function updateScoreDisplay() {
 // プレイヤーの次ブロック
 let nextPieceType = null;
 
+// 効果音再生
+function playClearSound() {
+  const audio = document.getElementById('clear-audio');
+  if (audio) {
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+  }
+}
+
 function arenaSweep() {
   let rowsToClear = [];
   for (let y = arena.length - 1; y >= 0; --y) {
@@ -36,12 +45,7 @@ function arenaSweep() {
     }
   }
   if (rowsToClear.length > 0) {
-    // 効果音再生
-    const audio = document.getElementById('clear-audio');
-    if (audio) {
-      audio.currentTime = 0;
-      audio.play();
-    }
+    playClearSound();
     // 吹き出し追加
     for (const y of rowsToClear) {
       popups.push({
@@ -51,7 +55,6 @@ function arenaSweep() {
       });
     }
     // スコア加算
-    // 1行:100, 2行:300, 3行:500, 4行:800 + comboボーナス
     const base = [0, 100, 300, 500, 800];
     score += (base[rowsToClear.length] || (rowsToClear.length * 200)) + combo * 50;
     combo++;
@@ -438,7 +441,7 @@ function setupTouchControls() {
   const btnDown = document.getElementById('down');
   const btnRotate = document.getElementById('rotate');
   const btnDrop = document.getElementById('drop');
-  const playAllSounds = () => { playBGM(); };
+  const playAllSounds = () => { playBGM(); playClearSound(); };
   if (btnLeft) btnLeft.addEventListener('touchstart', e => { e.preventDefault(); playAllSounds(); playerMove(-1); });
   if (btnRight) btnRight.addEventListener('touchstart', e => { e.preventDefault(); playAllSounds(); playerMove(1); });
   if (btnDown) btnDown.addEventListener('touchstart', e => { e.preventDefault(); playAllSounds(); playerDrop(); });
