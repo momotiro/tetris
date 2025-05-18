@@ -423,7 +423,7 @@ update();
 function playBGM() {
   const bgm = document.getElementById('bgm-audio');
   if (bgm && bgm.paused) {
-    bgm.volume = 0.5;
+    bgm.volume = 0.25;
     bgm.play().catch(() => {});
   }
 }
