@@ -251,10 +251,11 @@ function merge(arena, player) {
   });
 }
 
-// --- 即落下後の回転猶予（lock delay）実装 ---
+// --- 即落下後の回転・横移動猶予（lock delay）実装 ---
 let lockDelay = 0;
-const LOCK_DELAY_TIME = 200; // ms
+const LOCK_DELAY_TIME = 1000; // 1秒間
 let lockDelayActive = false;
+let lockDelayTimeout = null;
 
 function playerDrop() {
   if (clearing) return; // アニメーション中は操作不可
@@ -264,8 +265,8 @@ function playerDrop() {
     if (!lockDelayActive) {
       lockDelayActive = true;
       lockDelay = performance.now();
-      // lock delay中はreturnし、一定時間後に本当にロック
-      setTimeout(() => {
+      if (lockDelayTimeout) clearTimeout(lockDelayTimeout);
+      lockDelayTimeout = setTimeout(() => {
         if (lockDelayActive) {
           merge(arena, player);
           playerReset();
@@ -275,23 +276,39 @@ function playerDrop() {
       }, LOCK_DELAY_TIME);
       return;
     } else {
-      merge(arena, player);
-      playerReset();
-      arenaSweep();
-      lockDelayActive = false;
+      // lock delay中はロックしない
+      return;
     }
   } else {
     lockDelayActive = false;
+    if (lockDelayTimeout) {
+      clearTimeout(lockDelayTimeout);
+      lockDelayTimeout = null;
+    }
   }
   dropCounter = 0;
 }
 
-// lock delay中は回転・移動を許可
 function playerMove(dir) {
   if (clearing) return;
   player.pos.x += dir;
   if (collide(arena, player)) {
     player.pos.x -= dir;
+  }
+  // lock delay中に移動したら、lock delayをリセット
+  if (lockDelayActive) {
+    lockDelay = performance.now();
+    if (lockDelayTimeout) {
+      clearTimeout(lockDelayTimeout);
+    }
+    lockDelayTimeout = setTimeout(() => {
+      if (lockDelayActive) {
+        merge(arena, player);
+        playerReset();
+        arenaSweep();
+        lockDelayActive = false;
+      }
+    }, LOCK_DELAY_TIME);
   }
 }
 
@@ -333,6 +350,17 @@ function playerRotate(dir) {
   // lock delay中に回転したら、lock delayをリセット
   if (lockDelayActive) {
     lockDelay = performance.now();
+    if (lockDelayTimeout) {
+      clearTimeout(lockDelayTimeout);
+    }
+    lockDelayTimeout = setTimeout(() => {
+      if (lockDelayActive) {
+        merge(arena, player);
+        playerReset();
+        arenaSweep();
+        lockDelayActive = false;
+      }
+    }, LOCK_DELAY_TIME);
   }
 }
 
