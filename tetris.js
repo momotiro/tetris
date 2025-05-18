@@ -248,6 +248,20 @@ function drawMatrix(matrix, offset, rowAlphaList) {
   });
 }
 
+function getGhostPosition(player, arena) {
+  // 現在のミノの位置をコピー
+  const ghost = {
+    pos: { x: player.pos.x, y: player.pos.y },
+    matrix: player.matrix
+  };
+  // 下に移動できるだけ移動
+  while (!collide(arena, ghost)) {
+    ghost.pos.y++;
+  }
+  ghost.pos.y--; // 衝突したので1つ戻す
+  return ghost;
+}
+
 function draw() {
   // グラデーション背景
   const grad = context.createLinearGradient(0, 0, 0, canvas.height / 20);
@@ -266,6 +280,9 @@ function draw() {
   arena.forEach((row, y) => {
     drawMatrix([row], { x: 0, y: y }, [rowAlphaList[y]]);
   });
+  // ゴースト（落下予測）描画
+  const ghost = getGhostPosition(player, arena);
+  drawMatrixGhost(ghost.matrix, ghost.pos);
   // プレイヤーは常にalpha=1
   drawMatrix(player.matrix, player.pos);
 
@@ -288,6 +305,30 @@ function draw() {
     context.fillText(text, x - text.length * 0.3, y);
     context.restore();
   }
+}
+
+function drawMatrixGhost(matrix, offset) {
+  matrix.forEach((row, y) => {
+    row.forEach((value, x) => {
+      if (value !== 0) {
+        context.save();
+        context.globalAlpha = 0.25;
+        // ゴーストもグラデーション
+        const grad = context.createLinearGradient(
+          x + offset.x, y + offset.y, x + offset.x, y + offset.y + 1
+        );
+        grad.addColorStop(0, lightenColor(colors[value], 0.35));
+        grad.addColorStop(1, darkenColor(colors[value], 0.25));
+        context.fillStyle = grad;
+        context.fillRect(x + offset.x, y + offset.y, 1, 1);
+        // 白い枠線
+        context.strokeStyle = '#fff';
+        context.lineWidth = 0.08;
+        context.strokeRect(x + offset.x, y + offset.y, 1, 1);
+        context.restore();
+      }
+    });
+  });
 }
 
 function merge(arena, player) {
