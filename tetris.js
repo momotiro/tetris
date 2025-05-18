@@ -40,12 +40,20 @@ function playClearSound() {
     audio.volume = 1.0;
     audio.currentTime = 0;
     audio.play().catch(() => {});
+    // onendedでBGM再開
     audio.onended = () => {
       if (bgm) {
         bgm.volume = 0.25;
         bgm.play().catch(() => {});
       }
     };
+    // iOS対策: 0.5秒後にBGM再開（onendedが発火しない場合もカバー）
+    setTimeout(() => {
+      if (bgm && bgm.paused) {
+        bgm.volume = 0.25;
+        bgm.play().catch(() => {});
+      }
+    }, 500);
   }
 }
 
@@ -243,18 +251,42 @@ function merge(arena, player) {
   });
 }
 
+// --- 即落下後の回転猶予（lock delay）実装 ---
+let lockDelay = 0;
+const LOCK_DELAY_TIME = 200; // ms
+let lockDelayActive = false;
+
 function playerDrop() {
   if (clearing) return; // アニメーション中は操作不可
   player.pos.y++;
   if (collide(arena, player)) {
     player.pos.y--;
-    merge(arena, player);
-    playerReset();
-    arenaSweep();
+    if (!lockDelayActive) {
+      lockDelayActive = true;
+      lockDelay = performance.now();
+      // lock delay中はreturnし、一定時間後に本当にロック
+      setTimeout(() => {
+        if (lockDelayActive) {
+          merge(arena, player);
+          playerReset();
+          arenaSweep();
+          lockDelayActive = false;
+        }
+      }, LOCK_DELAY_TIME);
+      return;
+    } else {
+      merge(arena, player);
+      playerReset();
+      arenaSweep();
+      lockDelayActive = false;
+    }
+  } else {
+    lockDelayActive = false;
   }
   dropCounter = 0;
 }
 
+// lock delay中は回転・移動を許可
 function playerMove(dir) {
   if (clearing) return;
   player.pos.x += dir;
@@ -297,6 +329,10 @@ function playerRotate(dir) {
       player.pos.x = pos;
       return;
     }
+  }
+  // lock delay中に回転したら、lock delayをリセット
+  if (lockDelayActive) {
+    lockDelay = performance.now();
   }
 }
 
