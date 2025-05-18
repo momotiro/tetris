@@ -32,13 +32,20 @@ let nextPieceType = null;
 function playClearSound() {
   const audio = document.getElementById('clear-audio');
   const bgm = document.getElementById('bgm-audio');
-  if (bgm) bgm.volume = 0.03; // BGMを一時的に小さく
+  if (bgm) {
+    bgm.volume = 0.03;
+    bgm.pause();
+  }
   if (audio) {
     audio.volume = 1.0;
     audio.currentTime = 0;
     audio.play().catch(() => {});
-    // 効果音再生後、BGM音量を元に戻す
-    setTimeout(() => { if (bgm) bgm.volume = 0.25; }, 400);
+    audio.onended = () => {
+      if (bgm) {
+        bgm.volume = 0.25;
+        bgm.play().catch(() => {});
+      }
+    };
   }
 }
 
