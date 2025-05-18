@@ -389,15 +389,40 @@ function playerRotate(dir) {
   if (clearing) return;
   const pos = player.pos.x;
   let offset = 1;
+  const oldMatrix = player.matrix.map(row => [...row]);
+  const oldX = player.pos.x;
+  const oldY = player.pos.y;
   rotate(player.matrix, dir);
-  while (collide(arena, player)) {
-    player.pos.x += offset;
-    offset = -(offset + (offset > 0 ? 1 : -1));
-    if (offset > player.matrix[0].length) {
-      rotate(player.matrix, -dir);
-      player.pos.x = pos;
-      return;
+
+  // SRS風Wall Kick
+  const pieceType = getPieceType(player.matrix);
+  let kicked = false;
+  let kicks = [];
+  if (pieceType === 'I') {
+    // Iミノ用Wall Kick
+    kicks = [
+      {x: 0, y: 0}, {x: -2, y: 0}, {x: 1, y: 0}, {x: -2, y: -1}, {x: 1, y: 2}
+    ];
+  } else {
+    // Tミノ・その他
+    kicks = [
+      {x: 0, y: 0}, {x: -1, y: 0}, {x: -1, y: 1}, {x: 0, y: -2}, {x: -1, y: -2}
+    ];
+  }
+  for (const kick of kicks) {
+    player.pos.x = oldX + kick.x;
+    player.pos.y = oldY + kick.y;
+    if (!collide(arena, player)) {
+      kicked = true;
+      break;
     }
+  }
+  if (!kicked) {
+    // 回転できなければ元に戻す
+    player.matrix = oldMatrix;
+    player.pos.x = oldX;
+    player.pos.y = oldY;
+    return;
   }
   // lock delay中に回転したら、lock delayをリセット
   if (lockDelayActive) {
@@ -590,4 +615,11 @@ function setupTouchControls() {
   addBothEvents(btnDown, () => playerDrop());
   addBothEvents(btnRotate, () => playerRotate(1));
   addBothEvents(btnDrop, () => { while (!collide(arena, player)) { player.pos.y++; } player.pos.y--; playerDrop(); });
+}
+
+// ミノの種類を判定（T/I/その他）
+function getPieceType(matrix) {
+  if (matrix.length === 4) return 'I';
+  if (matrix.length === 3 && matrix[1][1] === 1) return 'T';
+  return 'O';
 } 
