@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>シンプルテトリス</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>テトリス</h1>
+  <div style="display: flex; justify-content: center; align-items: flex-start; gap: 32px;">
+    <div>
+      <canvas id="tetris" width="240" height="400"></canvas>
+    </div>
+    <div style="min-width: 100px;">
+      <h2 style="color: #fff;">NEXT</h2>
+      <canvas id="next" width="80" height="80" style="background:#111; border:1px solid #fff;"></canvas>
+      <h2 style="color: #fff;">SCORE</h2>
+      <div id="score" style="font-size:2em; color:#FFD700;">0</div>
+    </div>
+  </div>
+  <p>操作: ← → ↓ で移動、↑で回転、スペースで即落下</p>
+  <audio id="clear-audio" src="ひらめく2.mp3" preload="auto"></audio>
+  <audio id="bgm-audio" src="BGM_-_091_-_Huge_Future_Chord.mp3" preload="auto" loop volume="0.5"></audio>
+  <div id="touch-controls" style="display: flex; justify-content: center; gap: 10px; margin-top: 16px;">
+    <button id="left" style="font-size:2em;">←</button>
+    <button id="rotate" style="font-size:2em;">⟳</button>
+    <button id="right" style="font-size:2em;">→</button>
+    <button id="down" style="font-size:2em;">↓</button>
+    <button id="drop" style="font-size:2em;">⏬</button>
+  </div>
+  <script src="tetris.js"></script>
+</body>
+</html> 

@@ -1,0 +1,26 @@
+body {
+  background: #222;
+  color: #fff;
+  text-align: center;
+  font-family: sans-serif;
+  background-image: url('./0bf7ecc3-57d8-43a8-98c6-e0394a0bde04.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: inherit;
+  opacity: 0.15;
+  z-index: -1;
+}
+
+#tetris {
+  background: #111;
+  display: block;
+  margin: 0 auto;
+  border: 2px solid #fff;
+} 
