@@ -57,6 +57,54 @@ function playClearSound() {
   }
 }
 
+// --- 90秒間スコアアタック用 ---
+let timeLeft = 90;
+let timerInterval = null;
+let gameActive = true;
+let linesCleared = 0;
+let maxCombo = 0;
+
+function startTimer() {
+  document.getElementById('timer').textContent = timeLeft;
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    document.getElementById('timer').textContent = timeLeft;
+    if (timeLeft <= 0) {
+      endGame();
+    }
+  }, 1000);
+}
+
+function endGame() {
+  gameActive = false;
+  clearInterval(timerInterval);
+  document.getElementById('timer').textContent = '終了';
+  // スコアと内訳を表示
+  const result = document.createElement('div');
+  result.style.background = 'rgba(0,0,0,0.85)';
+  result.style.position = 'fixed';
+  result.style.top = '0';
+  result.style.left = '0';
+  result.style.width = '100vw';
+  result.style.height = '100vh';
+  result.style.display = 'flex';
+  result.style.flexDirection = 'column';
+  result.style.justifyContent = 'center';
+  result.style.alignItems = 'center';
+  result.style.zIndex = '1000';
+  result.innerHTML = `
+    <h1 style="color:#FFD700;">結果発表</h1>
+    <div style="font-size:2em; color:#fff;">スコア: <span style='color:#FFD700;'>${score}</span></div>
+    <div style="color:#fff; margin-top:1em;">
+      <div>消した行数: <b>${linesCleared}</b></div>
+      <div>最大コンボ: <b>${maxCombo}</b></div>
+      <div>合計スコア: <b>${score}</b></div>
+    </div>
+    <button onclick="location.reload()" style="margin-top:2em; font-size:1.2em;">もう一度遊ぶ</button>
+  `;
+  document.body.appendChild(result);
+}
+
 function arenaSweep() {
   let rowsToClear = [];
   for (let y = arena.length - 1; y >= 0; --y) {
@@ -66,7 +114,6 @@ function arenaSweep() {
   }
   if (rowsToClear.length > 0) {
     playClearSound();
-    // 吹き出し追加
     for (const y of rowsToClear) {
       popups.push({
         text: rowsToClear.length > 1 ? `${rowsToClear.length}連消し!` : 'ナイス！',
@@ -78,6 +125,8 @@ function arenaSweep() {
     const base = [0, 100, 300, 500, 800];
     score += (base[rowsToClear.length] || (rowsToClear.length * 200)) + combo * 50;
     combo++;
+    if (combo > maxCombo) maxCombo = combo;
+    linesCleared += rowsToClear.length;
     updateScoreDisplay();
     clearingRows = rowsToClear;
     clearingAlpha = 1;
@@ -258,6 +307,7 @@ let lockDelayActive = false;
 let lockDelayTimeout = null;
 
 function playerDrop() {
+  if (!gameActive) return;
   if (clearing) return; // アニメーション中は操作不可
   player.pos.y++;
   if (collide(arena, player)) {
@@ -290,6 +340,7 @@ function playerDrop() {
 }
 
 function playerMove(dir) {
+  if (!gameActive) return;
   if (clearing) return;
   player.pos.x += dir;
   if (collide(arena, player)) {
@@ -334,6 +385,7 @@ function playerReset() {
 }
 
 function playerRotate(dir) {
+  if (!gameActive) return;
   if (clearing) return;
   const pos = player.pos.x;
   let offset = 1;
@@ -522,10 +574,13 @@ function setupTouchControls() {
     const audio = document.getElementById('clear-audio');
     if (audio) audio.volume = 1.0;
   };
-  if (btnLeft) btnLeft.addEventListener('touchstart', e => { e.preventDefault(); playAllSounds(); playerMove(-1); });
-  if (btnRight) btnRight.addEventListener('touchstart', e => { e.preventDefault(); playAllSounds(); playerMove(1); });
-  if (btnDown) btnDown.addEventListener('touchstart', e => { e.preventDefault(); playAllSounds(); playerDrop(); });
-  if (btnRotate) btnRotate.addEventListener('touchstart', e => { e.preventDefault(); playAllSounds(); playerRotate(1); });
-  if (btnDrop) btnDrop.addEventListener('touchstart', e => { e.preventDefault(); playAllSounds(); while (!collide(arena, player)) { player.pos.y++; } player.pos.y--; playerDrop(); });
+  if (btnLeft) btnLeft.addEventListener('touchstart', e => { if (!gameActive) return; e.preventDefault(); playAllSounds(); playerMove(-1); });
+  if (btnRight) btnRight.addEventListener('touchstart', e => { if (!gameActive) return; e.preventDefault(); playAllSounds(); playerMove(1); });
+  if (btnDown) btnDown.addEventListener('touchstart', e => { if (!gameActive) return; e.preventDefault(); playAllSounds(); playerDrop(); });
+  if (btnRotate) btnRotate.addEventListener('touchstart', e => { if (!gameActive) return; e.preventDefault(); playAllSounds(); playerRotate(1); });
+  if (btnDrop) btnDrop.addEventListener('touchstart', e => { if (!gameActive) return; e.preventDefault(); playAllSounds(); while (!collide(arena, player)) { player.pos.y++; } player.pos.y--; playerDrop(); });
 }
-setupTouchControls(); 
+setupTouchControls();
+
+// ゲーム開始時にタイマー開始
+startTimer(); 
